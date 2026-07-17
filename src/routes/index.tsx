@@ -205,7 +205,7 @@ const TESTIMONIALS = [
     name: "Anaïs Kapoor",
     role: "Founder, Maison Aurea",
     quote:
-      "Khushboo turned our launch into an editorial moment. The Reel outperformed our paid campaign by 3×.",
+      "Khushi turned our launch into an editorial moment. The Reel outperformed our paid campaign by 3×.",
   },
   {
     name: "Rhea Malhotra",

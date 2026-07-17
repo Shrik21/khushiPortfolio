@@ -35,9 +35,23 @@ import p900 from "@/assets/photos/1000093900.jpg.asset.json";
 import p901 from "@/assets/photos/1000093901.jpg.asset.json";
 import p904 from "@/assets/photos/1000093904.jpg.asset.json";
 import p907 from "@/assets/photos/1000093907.jpg.asset.json";
+import p892 from "@/assets/photos/1000093892.jpg.asset.json";
+import p893 from "@/assets/photos/1000093893.jpg.asset.json";
+import p902 from "@/assets/photos/1000093902.jpg.asset.json";
+import p903 from "@/assets/photos/1000093903.jpg.asset.json";
+import p905 from "@/assets/photos/1000093905.jpg.asset.json";
+import p906 from "@/assets/photos/1000093906.jpg.asset.json";
+import p908 from "@/assets/photos/1000093908.jpg.asset.json";
+import p909 from "@/assets/photos/1000093909.jpg.asset.json";
+import p910 from "@/assets/photos/1000093910.jpg.asset.json";
+
+const IG_URL = "https://instagram.com/meethi_talks";
+const PHONE = "7555149784";
 
 const heroPortrait = heroPortraitAsset.url;
 const aboutImage = aboutImageAsset.url;
+const bgLifestyle = p902.url;
+const bgContact = aboutImageAsset.url;
 const g1 = p896.url;
 const g2 = p907.url;
 const g3 = p899.url;
@@ -46,6 +60,14 @@ const g5 = p898.url;
 const g6 = p895.url;
 const g7 = p900.url;
 const g8 = p904.url;
+const g9 = p892.url;
+const g10 = p893.url;
+const g11 = p903.url;
+const g12 = p905.url;
+const g13 = p906.url;
+const g14 = p908.url;
+const g15 = p909.url;
+const g16 = p910.url;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -136,13 +158,21 @@ const COLLABS = [
 
 const GALLERY = [
   { src: g1, cat: "Beauty", h: "tall" },
-  { src: g2, cat: "Fashion", h: "short" },
+  { src: g13, cat: "Beauty", h: "short" },
   { src: g3, cat: "Travel", h: "tall" },
   { src: g4, cat: "Lifestyle", h: "med" },
-  { src: g5, cat: "Travel", h: "med" },
+  { src: g14, cat: "Fashion", h: "tall" },
   { src: g6, cat: "Travel", h: "tall" },
   { src: g7, cat: "Fashion", h: "short" },
   { src: g8, cat: "Lifestyle", h: "med" },
+  { src: g9, cat: "Beauty", h: "med" },
+  { src: g10, cat: "Fashion", h: "tall" },
+  { src: g11, cat: "Beauty", h: "med" },
+  { src: g12, cat: "Beauty", h: "tall" },
+  { src: g5, cat: "Travel", h: "med" },
+  { src: g15, cat: "Lifestyle", h: "med" },
+  { src: g16, cat: "Lifestyle", h: "tall" },
+  { src: g2, cat: "Fashion", h: "short" },
   { src: heroPortrait, cat: "Beauty", h: "tall" },
 ];
 
@@ -175,7 +205,7 @@ const TESTIMONIALS = [
     name: "Anaïs Kapoor",
     role: "Founder, Maison Aurea",
     quote:
-      "Khushboo turned our launch into an editorial moment. The Reel outperformed our paid campaign by 3×.",
+      "Khushi turned our launch into an editorial moment. The Reel outperformed our paid campaign by 3×.",
   },
   {
     name: "Rhea Malhotra",
@@ -311,7 +341,7 @@ function Nav() {
           <a href="#home" className="flex items-baseline gap-2">
             <span className="font-display text-2xl tracking-tight">Meethi Talks</span>
             <span className="hidden text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:inline">
-              by Khushboo
+              by Khushi
             </span>
           </a>
           <nav className="hidden items-center gap-8 lg:flex">
@@ -379,25 +409,43 @@ function Nav() {
 function Hero() {
   return (
     <section id="home" className="relative min-h-screen overflow-hidden bg-ivory pt-24">
+      {/* Soft blurred lifestyle backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.14]"
+        style={{
+          backgroundImage: `url(${bgLifestyle})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(28px) saturate(1.1)",
+          transform: "scale(1.1)",
+        }}
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ivory/70 via-ivory/60 to-ivory" aria-hidden />
       <div className="pointer-events-none absolute -left-32 top-40 h-96 w-96 rounded-full bg-rose/50 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 bottom-10 h-96 w-96 rounded-full bg-gold-soft/40 blur-3xl" />
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 pb-24 pt-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-10 lg:pt-16">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 pb-24 pt-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-10 lg:pt-16">
         <div className="animate-fade-up">
           <span className="eyebrow">Meethi Talks · Est. 2020</span>
-          <h1 className="mt-6 font-display text-[3.4rem] leading-[1.02] tracking-tight sm:text-6xl lg:text-[5.4rem]">
-            Creating authentic <em className="not-italic text-gold">stories</em> that inspire, influence & connect.
+          <h1 className="mt-6 font-display text-[3rem] leading-[1.02] tracking-tight sm:text-6xl lg:text-[5rem]">
+            Meethi Talks <span className="block text-gold">by Khushi</span>
           </h1>
-          <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            I'm Khushboo Singh — a lifestyle storyteller working with brands that value warmth,
-            craft and a genuine voice. Fashion · Beauty · Travel · UGC.
+          <p className="mt-5 font-display text-2xl italic text-foreground/80 sm:text-3xl">
+            Follow for Daily Love Vibes <span className="not-italic">❤️</span>
+          </p>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Instagram influencer & digital creator crafting authentic stories in
+            lifestyle, fashion, beauty and travel — from Pithoragarh to your feed.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <a
-              href="#portfolio"
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-xs uppercase tracking-[0.25em] text-primary-foreground transition-colors hover:bg-gold"
             >
-              View Portfolio
+              <Instagram className="h-4 w-4" /> Follow on Instagram
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
             <a
@@ -407,18 +455,33 @@ function Hero() {
               Collaborate
             </a>
           </div>
-          <div className="mt-14 flex items-center gap-5 text-muted-foreground">
-            {[Instagram, Youtube, Facebook, Mail].map((Icon, i) => (
-              <a
-                key={i}
-                href="#"
-                aria-label="social"
-                className="transition-colors hover:text-gold"
-              >
-                <Icon className="h-5 w-5" />
-              </a>
-            ))}
-            <span className="ml-4 text-xs uppercase tracking-[0.3em]">@meethi.talks</span>
+          <div className="mt-12 flex items-center gap-5 text-muted-foreground">
+            <a
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="transition-all hover:-translate-y-0.5 hover:text-gold"
+            >
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a href="#" aria-label="YouTube" className="transition-colors hover:text-gold">
+              <Youtube className="h-5 w-5" />
+            </a>
+            <a href="#" aria-label="Facebook" className="transition-colors hover:text-gold">
+              <Facebook className="h-5 w-5" />
+            </a>
+            <a href="mailto:khushikathayat.official@gmail.com" aria-label="Email" className="transition-colors hover:text-gold">
+              <Mail className="h-5 w-5" />
+            </a>
+            <a
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-4 text-xs uppercase tracking-[0.3em] gold-underline"
+            >
+              @meethi_talks
+            </a>
           </div>
         </div>
 
@@ -427,10 +490,10 @@ function Hero() {
           <div className="relative overflow-hidden rounded-[2rem] shadow-luxe">
             <img
               src={heroPortrait}
-              alt="Khushboo Singh portrait"
+              alt="Khushi — Meethi Talks portrait"
               width={1024}
               height={1408}
-              className="h-[560px] w-full object-cover lg:h-[680px]"
+              className="h-[560px] w-full object-cover transition-transform duration-[6s] hover:scale-105 lg:h-[680px]"
             />
           </div>
           <div className="absolute -bottom-6 -left-6 hidden rounded-2xl border border-border bg-background/90 px-5 py-4 shadow-soft backdrop-blur-md sm:block">
@@ -459,19 +522,35 @@ function SectionTitle({ eyebrow, title, sub }: { eyebrow: string; title: string;
 
 function About() {
   const ref = useReveal<HTMLElement>();
+  const profile = [
+    { label: "Creator", value: "Khushi" },
+    { label: "Brand", value: "Meethi Talks" },
+    { label: "Profession", value: "Instagram Influencer & Digital Creator" },
+    { label: "Education", value: "B.Com Graduate" },
+    { label: "Hometown", value: "Pithoragarh, Uttarakhand, India" },
+  ];
   return (
-    <section id="about" ref={ref} className="bg-background py-28 lg:py-36">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20 lg:px-10">
+    <section id="about" ref={ref} className="relative bg-background py-28 lg:py-36">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{ backgroundImage: `url(${g13})`, backgroundSize: "cover", backgroundPosition: "center" }}
+        aria-hidden
+      />
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20 lg:px-10">
         <div className="reveal relative">
           <div className="absolute -inset-4 rounded-[2rem] bg-rose/40" />
           <img
             src={aboutImage}
-            alt="Editorial flatlay"
+            alt="Khushi — Meethi Talks"
             width={1024}
             height={1280}
             loading="lazy"
             className="relative h-[520px] w-full rounded-[2rem] object-cover shadow-luxe lg:h-[620px]"
           />
+          <div className="absolute -bottom-5 right-4 hidden rounded-2xl border border-border bg-background/95 px-5 py-3 shadow-soft backdrop-blur sm:block">
+            <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Based in</div>
+            <div className="font-display text-lg">Pithoragarh, IN</div>
+          </div>
         </div>
         <div className="reveal">
           <span className="eyebrow">About</span>
@@ -479,29 +558,25 @@ function About() {
             A quiet luxury of everyday moments.
           </h2>
           <p className="mt-6 leading-relaxed text-muted-foreground">
-            Meethi Talks began as a personal journal — a place to notice the softer texture of things.
-            Five years on, it has grown into a considered creative studio that partners with brands
-            who share the same devotion to craft, warmth and honesty.
+            Hi, I'm Khushi — the heart behind Meethi Talks. What began as a personal journal from
+            the hills of Pithoragarh has grown into a creative space where I share daily love vibes,
+            fashion diaries and lifestyle stories with a community that feels like home.
           </p>
           <p className="mt-4 leading-relaxed text-muted-foreground">
             I write, style, shoot and edit every piece of content in-house — so what reaches your
-            audience feels unmistakably human. Whether it's a launch reel, a hotel diary or a beauty
-            ritual, the promise is the same: stories that people save, share and remember.
+            audience feels unmistakably human, warm and real.
           </p>
 
-          <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-border pt-8">
-            <div>
-              <dt className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Mission</dt>
-              <dd className="mt-2 font-display text-xl">Warm stories</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Values</dt>
-              <dd className="mt-2 font-display text-xl">Craft · Trust</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Since</dt>
-              <dd className="mt-2 font-display text-xl">2020</dd>
-            </div>
+          <dl className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {profile.map((p) => (
+              <div
+                key={p.label}
+                className="group rounded-2xl border border-border bg-ivory p-5 transition-all hover:-translate-y-0.5 hover:border-gold hover:shadow-soft"
+              >
+                <dt className="text-[10px] uppercase tracking-[0.28em] text-gold">{p.label}</dt>
+                <dd className="mt-1.5 font-display text-lg leading-snug">{p.value}</dd>
+              </div>
+            ))}
           </dl>
         </div>
       </div>
@@ -946,9 +1021,32 @@ function FAQ() {
 
 function Contact() {
   const ref = useReveal<HTMLElement>();
+  const items: Array<{
+    icon: typeof Mail;
+    label: string;
+    val: string;
+    href?: string;
+    external?: boolean;
+  }> = [
+    { icon: Mail, label: "Email", val: "khushikathayat.official@gmail.com", href: "mailto:khushikathayat.official@gmail.com" },
+    { icon: Instagram, label: "Instagram", val: "@meethi_talks", href: IG_URL, external: true },
+    { icon: Phone, label: "Phone", val: PHONE, href: `tel:${PHONE}` },
+    { icon: MapPin, label: "Based in", val: "Pithoragarh, Uttarakhand, India" },
+  ];
   return (
-    <section id="contact" ref={ref} className="bg-foreground text-primary-foreground py-28 lg:py-36">
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+    <section
+      id="contact"
+      ref={ref}
+      className="relative overflow-hidden bg-foreground py-28 text-primary-foreground lg:py-36"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-25"
+        style={{ backgroundImage: `url(${bgContact})`, backgroundSize: "cover", backgroundPosition: "center" }}
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-foreground/85 via-foreground/90 to-foreground" aria-hidden />
+
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="reveal mx-auto max-w-3xl text-center">
           <span className="eyebrow">Contact</span>
           <h2 className="mt-4 font-display text-4xl leading-tight sm:text-6xl">
@@ -1006,28 +1104,45 @@ function Contact() {
             </button>
           </form>
 
-          <div className="space-y-8 lg:pl-8">
-            {[
-              { icon: Mail, label: "Email", val: "khushikathayat.official@gmail.com" },
-              { icon: Instagram, label: "Instagram", val: "@meethi.talks" },
-              { icon: Phone, label: "Phone", val: "+91 98765 43210" },
-              { icon: MapPin, label: "Based in", val: "Mumbai, India" },
-            ].map((c) => (
-              <div key={c.label} className="flex items-start gap-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20">
-                  <c.icon className="h-5 w-5" />
+          <div className="space-y-5 lg:pl-8">
+            {items.map((c) => {
+              const Inner = (
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition-all hover:-translate-y-0.5 hover:border-gold/60 hover:bg-white/10">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20 text-gold">
+                    <c.icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs uppercase tracking-[0.25em] text-white/50">{c.label}</div>
+                    <div className="mt-1 truncate">{c.val}</div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xs uppercase tracking-[0.25em] text-white/50">{c.label}</div>
-                  <div className="mt-1 truncate">{c.val}</div>
-                </div>
-              </div>
-            ))}
+              );
+              return c.href ? (
+                <a
+                  key={c.label}
+                  href={c.href}
+                  {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="block"
+                >
+                  {Inner}
+                </a>
+              ) : (
+                <div key={c.label}>{Inner}</div>
+              );
+            })}
             <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
-              <div className="text-xs uppercase tracking-[0.25em] text-gold">Business inquiries</div>
+              <div className="text-xs uppercase tracking-[0.25em] text-gold">Follow for Daily Love Vibes ❤️</div>
               <p className="mt-2 text-sm text-white/70">
-                For press, PR mailers and long-form partnerships, please write directly to the email
-                above with your brief and timeline.
+                Say hi on Instagram{" "}
+                <a
+                  href={IG_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white gold-underline"
+                >
+                  @meethi_talks
+                </a>{" "}
+                — DMs open for collaborations and press.
               </p>
             </div>
           </div>
@@ -1038,13 +1153,20 @@ function Contact() {
 }
 
 function Footer() {
+  const socials: Array<{ I: typeof Instagram; href: string; label: string; external?: boolean }> = [
+    { I: Instagram, href: IG_URL, label: "Instagram", external: true },
+    { I: Youtube, href: "#", label: "YouTube" },
+    { I: Facebook, href: "#", label: "Facebook" },
+    { I: Mail, href: "mailto:khushikathayat.official@gmail.com", label: "Email" },
+  ];
   return (
     <footer className="border-t border-border bg-ivory py-14">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 sm:grid-cols-2 lg:grid-cols-4 lg:px-10">
         <div>
           <div className="font-display text-2xl">Meethi Talks</div>
+          <div className="mt-1 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">by Khushi</div>
           <p className="mt-3 text-sm text-muted-foreground">
-            Authentic stories, styled with warmth. By Khushboo Singh.
+            Follow for Daily Love Vibes ❤️ — by Khushi, from Pithoragarh.
           </p>
         </div>
         <div>
@@ -1060,11 +1182,22 @@ function Footer() {
         <div>
           <div className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Follow</div>
           <div className="mt-4 flex gap-4 text-muted-foreground">
-            {[Instagram, Youtube, Facebook, Mail].map((I, i) => (
-              <a key={i} href="#" aria-label="social" className="hover:text-gold">
-                <I className="h-5 w-5" />
+            {socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                aria-label={s.label}
+                {...(s.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="transition-all hover:-translate-y-0.5 hover:text-gold"
+              >
+                <s.I className="h-5 w-5" />
               </a>
             ))}
+          </div>
+          <div className="mt-5 space-y-1 text-sm">
+            <a href={`tel:${PHONE}`} className="flex items-center gap-2 gold-underline">
+              <Phone className="h-4 w-4" /> {PHONE}
+            </a>
           </div>
         </div>
         <div>
@@ -1082,13 +1215,58 @@ function Footer() {
         </div>
       </div>
       <div className="mx-auto mt-12 flex max-w-7xl flex-col items-center justify-between gap-3 px-6 text-xs text-muted-foreground sm:flex-row lg:px-10">
-        <div>© {new Date().getFullYear()} Meethi Talks · Khushboo Singh. All rights reserved.</div>
+        <div>© {new Date().getFullYear()} Meethi Talks by Khushi. All rights reserved.</div>
         <div className="flex gap-6">
           <a href="#" className="gold-underline">Privacy</a>
           <a href="#" className="gold-underline">Terms</a>
         </div>
       </div>
     </footer>
+  );
+}
+
+function ParallaxStrip({
+  src,
+  quote,
+}: {
+  src: string;
+  quote: string;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    const on = () => {
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const p = 1 - (rect.top + rect.height / 2) / (vh + rect.height / 2);
+      setY(Math.max(-40, Math.min(40, (p - 0.5) * 80)));
+    };
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+  return (
+    <section
+      ref={ref}
+      className="relative h-[55vh] min-h-[380px] overflow-hidden bg-foreground"
+      aria-hidden={false}
+    >
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        className="absolute inset-0 h-[120%] w-full object-cover will-change-transform"
+        style={{ transform: `translate3d(0, ${y}px, 0)` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-foreground/40 via-foreground/30 to-foreground/60" />
+      <div className="relative mx-auto flex h-full max-w-4xl items-center justify-center px-6 text-center">
+        <p className="font-display text-3xl italic leading-snug text-primary-foreground sm:text-5xl">
+          "{quote}"
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -1118,10 +1296,12 @@ function Home() {
       <main>
         <Hero />
         <About />
+        <ParallaxStrip src={g10} quote="Follow for Daily Love Vibes ❤️" />
         <Stats />
         <Audience />
         <Collaborations />
         <Portfolio />
+        <ParallaxStrip src={g3} quote="Stories styled with warmth, from the hills of Pithoragarh." />
         <Services />
         <WhyMe />
         <Testimonials />

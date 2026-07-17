@@ -1225,6 +1225,51 @@ function Footer() {
   );
 }
 
+function ParallaxStrip({
+  src,
+  quote,
+}: {
+  src: string;
+  quote: string;
+}) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    const on = () => {
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const p = 1 - (rect.top + rect.height / 2) / (vh + rect.height / 2);
+      setY(Math.max(-40, Math.min(40, (p - 0.5) * 80)));
+    };
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+  return (
+    <section
+      ref={ref}
+      className="relative h-[55vh] min-h-[380px] overflow-hidden bg-foreground"
+      aria-hidden={false}
+    >
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        className="absolute inset-0 h-[120%] w-full object-cover will-change-transform"
+        style={{ transform: `translate3d(0, ${y}px, 0)` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-foreground/40 via-foreground/30 to-foreground/60" />
+      <div className="relative mx-auto flex h-full max-w-4xl items-center justify-center px-6 text-center">
+        <p className="font-display text-3xl italic leading-snug text-primary-foreground sm:text-5xl">
+          "{quote}"
+        </p>
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- Page ---------------- */
 
 function Home() {

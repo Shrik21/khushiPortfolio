@@ -1296,10 +1296,12 @@ function Home() {
       <main>
         <Hero />
         <About />
+        <ParallaxStrip src={g10} quote="Follow for Daily Love Vibes ❤️" />
         <Stats />
         <Audience />
         <Collaborations />
         <Portfolio />
+        <ParallaxStrip src={g3} quote="Stories styled with warmth, from the hills of Pithoragarh." />
         <Services />
         <WhyMe />
         <Testimonials />

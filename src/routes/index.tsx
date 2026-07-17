@@ -25,14 +25,27 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import heroPortrait from "@/assets/hero-portrait.jpg";
-import aboutImage from "@/assets/about-image.jpg";
-import g1 from "@/assets/gallery-1.jpg";
-import g2 from "@/assets/gallery-2.jpg";
-import g3 from "@/assets/gallery-3.jpg";
-import g4 from "@/assets/gallery-4.jpg";
-import g5 from "@/assets/gallery-5.jpg";
-import g6 from "@/assets/gallery-6.jpg";
+import heroPortraitAsset from "@/assets/photos/1000093897.jpg.asset.json";
+import aboutImageAsset from "@/assets/photos/1000093894.jpg.asset.json";
+import p895 from "@/assets/photos/1000093895.jpg.asset.json";
+import p896 from "@/assets/photos/1000093896.jpg.asset.json";
+import p898 from "@/assets/photos/1000093898.jpg.asset.json";
+import p899 from "@/assets/photos/1000093899.jpg.asset.json";
+import p900 from "@/assets/photos/1000093900.jpg.asset.json";
+import p901 from "@/assets/photos/1000093901.jpg.asset.json";
+import p904 from "@/assets/photos/1000093904.jpg.asset.json";
+import p907 from "@/assets/photos/1000093907.jpg.asset.json";
+
+const heroPortrait = heroPortraitAsset.url;
+const aboutImage = aboutImageAsset.url;
+const g1 = p896.url;
+const g2 = p907.url;
+const g3 = p899.url;
+const g4 = p901.url;
+const g5 = p898.url;
+const g6 = p895.url;
+const g7 = p900.url;
+const g8 = p904.url;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -122,15 +135,15 @@ const COLLABS = [
 ];
 
 const GALLERY = [
-  { src: g1, cat: "Fashion", h: "tall" },
-  { src: g2, cat: "Beauty", h: "short" },
+  { src: g1, cat: "Beauty", h: "tall" },
+  { src: g2, cat: "Fashion", h: "short" },
   { src: g3, cat: "Travel", h: "tall" },
-  { src: g4, cat: "Food", h: "med" },
-  { src: g5, cat: "Lifestyle", h: "med" },
-  { src: g6, cat: "Daily Life", h: "tall" },
-  { src: g2, cat: "UGC", h: "short" },
-  { src: g1, cat: "Reels", h: "med" },
-  { src: g3, cat: "Photography", h: "tall" },
+  { src: g4, cat: "Lifestyle", h: "med" },
+  { src: g5, cat: "Travel", h: "med" },
+  { src: g6, cat: "Travel", h: "tall" },
+  { src: g7, cat: "Fashion", h: "short" },
+  { src: g8, cat: "Lifestyle", h: "med" },
+  { src: heroPortrait, cat: "Beauty", h: "tall" },
 ];
 
 const GALLERY_CATS = ["All", "Fashion", "Beauty", "Travel", "Food", "Lifestyle", "UGC", "Reels", "Photography"];

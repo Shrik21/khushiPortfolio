@@ -341,7 +341,7 @@ function Nav() {
           <a href="#home" className="flex items-baseline gap-2">
             <span className="font-display text-2xl tracking-tight">Meethi Talks</span>
             <span className="hidden text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:inline">
-              by Khushboo
+              by Khushi
             </span>
           </a>
           <nav className="hidden items-center gap-8 lg:flex">

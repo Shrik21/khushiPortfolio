@@ -522,19 +522,35 @@ function SectionTitle({ eyebrow, title, sub }: { eyebrow: string; title: string;
 
 function About() {
   const ref = useReveal<HTMLElement>();
+  const profile = [
+    { label: "Creator", value: "Khushi" },
+    { label: "Brand", value: "Meethi Talks" },
+    { label: "Profession", value: "Instagram Influencer & Digital Creator" },
+    { label: "Education", value: "B.Com Graduate" },
+    { label: "Hometown", value: "Pithoragarh, Uttarakhand, India" },
+  ];
   return (
-    <section id="about" ref={ref} className="bg-background py-28 lg:py-36">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20 lg:px-10">
+    <section id="about" ref={ref} className="relative bg-background py-28 lg:py-36">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.05]"
+        style={{ backgroundImage: `url(${g13})`, backgroundSize: "cover", backgroundPosition: "center" }}
+        aria-hidden
+      />
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20 lg:px-10">
         <div className="reveal relative">
           <div className="absolute -inset-4 rounded-[2rem] bg-rose/40" />
           <img
             src={aboutImage}
-            alt="Editorial flatlay"
+            alt="Khushi — Meethi Talks"
             width={1024}
             height={1280}
             loading="lazy"
             className="relative h-[520px] w-full rounded-[2rem] object-cover shadow-luxe lg:h-[620px]"
           />
+          <div className="absolute -bottom-5 right-4 hidden rounded-2xl border border-border bg-background/95 px-5 py-3 shadow-soft backdrop-blur sm:block">
+            <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">Based in</div>
+            <div className="font-display text-lg">Pithoragarh, IN</div>
+          </div>
         </div>
         <div className="reveal">
           <span className="eyebrow">About</span>
@@ -542,29 +558,25 @@ function About() {
             A quiet luxury of everyday moments.
           </h2>
           <p className="mt-6 leading-relaxed text-muted-foreground">
-            Meethi Talks began as a personal journal — a place to notice the softer texture of things.
-            Five years on, it has grown into a considered creative studio that partners with brands
-            who share the same devotion to craft, warmth and honesty.
+            Hi, I'm Khushi — the heart behind Meethi Talks. What began as a personal journal from
+            the hills of Pithoragarh has grown into a creative space where I share daily love vibes,
+            fashion diaries and lifestyle stories with a community that feels like home.
           </p>
           <p className="mt-4 leading-relaxed text-muted-foreground">
             I write, style, shoot and edit every piece of content in-house — so what reaches your
-            audience feels unmistakably human. Whether it's a launch reel, a hotel diary or a beauty
-            ritual, the promise is the same: stories that people save, share and remember.
+            audience feels unmistakably human, warm and real.
           </p>
 
-          <dl className="mt-10 grid grid-cols-3 gap-6 border-t border-border pt-8">
-            <div>
-              <dt className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Mission</dt>
-              <dd className="mt-2 font-display text-xl">Warm stories</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Values</dt>
-              <dd className="mt-2 font-display text-xl">Craft · Trust</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Since</dt>
-              <dd className="mt-2 font-display text-xl">2020</dd>
-            </div>
+          <dl className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {profile.map((p) => (
+              <div
+                key={p.label}
+                className="group rounded-2xl border border-border bg-ivory p-5 transition-all hover:-translate-y-0.5 hover:border-gold hover:shadow-soft"
+              >
+                <dt className="text-[10px] uppercase tracking-[0.28em] text-gold">{p.label}</dt>
+                <dd className="mt-1.5 font-display text-lg leading-snug">{p.value}</dd>
+              </div>
+            ))}
           </dl>
         </div>
       </div>

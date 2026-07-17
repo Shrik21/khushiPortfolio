@@ -1021,9 +1021,32 @@ function FAQ() {
 
 function Contact() {
   const ref = useReveal<HTMLElement>();
+  const items: Array<{
+    icon: typeof Mail;
+    label: string;
+    val: string;
+    href?: string;
+    external?: boolean;
+  }> = [
+    { icon: Mail, label: "Email", val: "khushikathayat.official@gmail.com", href: "mailto:khushikathayat.official@gmail.com" },
+    { icon: Instagram, label: "Instagram", val: "@meethi_talks", href: IG_URL, external: true },
+    { icon: Phone, label: "Phone", val: PHONE, href: `tel:${PHONE}` },
+    { icon: MapPin, label: "Based in", val: "Pithoragarh, Uttarakhand, India" },
+  ];
   return (
-    <section id="contact" ref={ref} className="bg-foreground text-primary-foreground py-28 lg:py-36">
-      <div className="mx-auto max-w-7xl px-6 lg:px-10">
+    <section
+      id="contact"
+      ref={ref}
+      className="relative overflow-hidden bg-foreground py-28 text-primary-foreground lg:py-36"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-25"
+        style={{ backgroundImage: `url(${bgContact})`, backgroundSize: "cover", backgroundPosition: "center" }}
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-foreground/85 via-foreground/90 to-foreground" aria-hidden />
+
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="reveal mx-auto max-w-3xl text-center">
           <span className="eyebrow">Contact</span>
           <h2 className="mt-4 font-display text-4xl leading-tight sm:text-6xl">
@@ -1081,28 +1104,45 @@ function Contact() {
             </button>
           </form>
 
-          <div className="space-y-8 lg:pl-8">
-            {[
-              { icon: Mail, label: "Email", val: "khushikathayat.official@gmail.com" },
-              { icon: Instagram, label: "Instagram", val: "@meethi.talks" },
-              { icon: Phone, label: "Phone", val: "+91 98765 43210" },
-              { icon: MapPin, label: "Based in", val: "Mumbai, India" },
-            ].map((c) => (
-              <div key={c.label} className="flex items-start gap-4">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20">
-                  <c.icon className="h-5 w-5" />
+          <div className="space-y-5 lg:pl-8">
+            {items.map((c) => {
+              const Inner = (
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition-all hover:-translate-y-0.5 hover:border-gold/60 hover:bg-white/10">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20 text-gold">
+                    <c.icon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs uppercase tracking-[0.25em] text-white/50">{c.label}</div>
+                    <div className="mt-1 truncate">{c.val}</div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xs uppercase tracking-[0.25em] text-white/50">{c.label}</div>
-                  <div className="mt-1 truncate">{c.val}</div>
-                </div>
-              </div>
-            ))}
+              );
+              return c.href ? (
+                <a
+                  key={c.label}
+                  href={c.href}
+                  {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="block"
+                >
+                  {Inner}
+                </a>
+              ) : (
+                <div key={c.label}>{Inner}</div>
+              );
+            })}
             <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
-              <div className="text-xs uppercase tracking-[0.25em] text-gold">Business inquiries</div>
+              <div className="text-xs uppercase tracking-[0.25em] text-gold">Follow for Daily Love Vibes ❤️</div>
               <p className="mt-2 text-sm text-white/70">
-                For press, PR mailers and long-form partnerships, please write directly to the email
-                above with your brief and timeline.
+                Say hi on Instagram{" "}
+                <a
+                  href={IG_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white gold-underline"
+                >
+                  @meethi_talks
+                </a>{" "}
+                — DMs open for collaborations and press.
               </p>
             </div>
           </div>
@@ -1113,13 +1153,20 @@ function Contact() {
 }
 
 function Footer() {
+  const socials: Array<{ I: typeof Instagram; href: string; label: string; external?: boolean }> = [
+    { I: Instagram, href: IG_URL, label: "Instagram", external: true },
+    { I: Youtube, href: "#", label: "YouTube" },
+    { I: Facebook, href: "#", label: "Facebook" },
+    { I: Mail, href: "mailto:khushikathayat.official@gmail.com", label: "Email" },
+  ];
   return (
     <footer className="border-t border-border bg-ivory py-14">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 sm:grid-cols-2 lg:grid-cols-4 lg:px-10">
         <div>
           <div className="font-display text-2xl">Meethi Talks</div>
+          <div className="mt-1 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">by Khushi</div>
           <p className="mt-3 text-sm text-muted-foreground">
-            Authentic stories, styled with warmth. By Khushboo Singh.
+            Follow for Daily Love Vibes ❤️ — by Khushi, from Pithoragarh.
           </p>
         </div>
         <div>
@@ -1135,11 +1182,22 @@ function Footer() {
         <div>
           <div className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Follow</div>
           <div className="mt-4 flex gap-4 text-muted-foreground">
-            {[Instagram, Youtube, Facebook, Mail].map((I, i) => (
-              <a key={i} href="#" aria-label="social" className="hover:text-gold">
-                <I className="h-5 w-5" />
+            {socials.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                aria-label={s.label}
+                {...(s.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="transition-all hover:-translate-y-0.5 hover:text-gold"
+              >
+                <s.I className="h-5 w-5" />
               </a>
             ))}
+          </div>
+          <div className="mt-5 space-y-1 text-sm">
+            <a href={`tel:${PHONE}`} className="flex items-center gap-2 gold-underline">
+              <Phone className="h-4 w-4" /> {PHONE}
+            </a>
           </div>
         </div>
         <div>
@@ -1157,7 +1215,7 @@ function Footer() {
         </div>
       </div>
       <div className="mx-auto mt-12 flex max-w-7xl flex-col items-center justify-between gap-3 px-6 text-xs text-muted-foreground sm:flex-row lg:px-10">
-        <div>© {new Date().getFullYear()} Meethi Talks · Khushboo Singh. All rights reserved.</div>
+        <div>© {new Date().getFullYear()} Meethi Talks by Khushi. All rights reserved.</div>
         <div className="flex gap-6">
           <a href="#" className="gold-underline">Privacy</a>
           <a href="#" className="gold-underline">Terms</a>

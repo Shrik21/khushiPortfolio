@@ -77,14 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Meethi Talks — Khushboo Singh · Lifestyle & Fashion Creator" },
+      { title: "Meethi Talks by Khushi — Lifestyle & Fashion Creator" },
       {
         name: "description",
         content:
-          "Portfolio of Khushboo Singh (Meethi Talks) — Instagram lifestyle, fashion, beauty & UGC creator. Authentic storytelling for premium brands.",
+          "Meethi Talks by Khushi — Instagram influencer & digital creator sharing daily love vibes. Lifestyle, fashion, beauty & UGC collaborations.",
       },
-      { name: "author", content: "Khushboo Singh" },
-      { property: "og:title", content: "Meethi Talks — Khushboo Singh" },
+      { name: "author", content: "Khushi" },
+      { property: "og:title", content: "Meethi Talks by Khushi" },
       {
         property: "og:description",
         content:

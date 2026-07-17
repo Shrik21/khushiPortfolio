@@ -409,25 +409,43 @@ function Nav() {
 function Hero() {
   return (
     <section id="home" className="relative min-h-screen overflow-hidden bg-ivory pt-24">
+      {/* Soft blurred lifestyle backdrop */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.14]"
+        style={{
+          backgroundImage: `url(${bgLifestyle})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(28px) saturate(1.1)",
+          transform: "scale(1.1)",
+        }}
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ivory/70 via-ivory/60 to-ivory" aria-hidden />
       <div className="pointer-events-none absolute -left-32 top-40 h-96 w-96 rounded-full bg-rose/50 blur-3xl" />
       <div className="pointer-events-none absolute -right-24 bottom-10 h-96 w-96 rounded-full bg-gold-soft/40 blur-3xl" />
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 pb-24 pt-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-10 lg:pt-16">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 pb-24 pt-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-10 lg:pt-16">
         <div className="animate-fade-up">
           <span className="eyebrow">Meethi Talks · Est. 2020</span>
-          <h1 className="mt-6 font-display text-[3.4rem] leading-[1.02] tracking-tight sm:text-6xl lg:text-[5.4rem]">
-            Creating authentic <em className="not-italic text-gold">stories</em> that inspire, influence & connect.
+          <h1 className="mt-6 font-display text-[3rem] leading-[1.02] tracking-tight sm:text-6xl lg:text-[5rem]">
+            Meethi Talks <span className="block text-gold">by Khushi</span>
           </h1>
-          <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            I'm Khushboo Singh — a lifestyle storyteller working with brands that value warmth,
-            craft and a genuine voice. Fashion · Beauty · Travel · UGC.
+          <p className="mt-5 font-display text-2xl italic text-foreground/80 sm:text-3xl">
+            Follow for Daily Love Vibes <span className="not-italic">❤️</span>
+          </p>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Instagram influencer & digital creator crafting authentic stories in
+            lifestyle, fashion, beauty and travel — from Pithoragarh to your feed.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <a
-              href="#portfolio"
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-xs uppercase tracking-[0.25em] text-primary-foreground transition-colors hover:bg-gold"
             >
-              View Portfolio
+              <Instagram className="h-4 w-4" /> Follow on Instagram
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
             <a
@@ -437,18 +455,33 @@ function Hero() {
               Collaborate
             </a>
           </div>
-          <div className="mt-14 flex items-center gap-5 text-muted-foreground">
-            {[Instagram, Youtube, Facebook, Mail].map((Icon, i) => (
-              <a
-                key={i}
-                href="#"
-                aria-label="social"
-                className="transition-colors hover:text-gold"
-              >
-                <Icon className="h-5 w-5" />
-              </a>
-            ))}
-            <span className="ml-4 text-xs uppercase tracking-[0.3em]">@meethi.talks</span>
+          <div className="mt-12 flex items-center gap-5 text-muted-foreground">
+            <a
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="transition-all hover:-translate-y-0.5 hover:text-gold"
+            >
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a href="#" aria-label="YouTube" className="transition-colors hover:text-gold">
+              <Youtube className="h-5 w-5" />
+            </a>
+            <a href="#" aria-label="Facebook" className="transition-colors hover:text-gold">
+              <Facebook className="h-5 w-5" />
+            </a>
+            <a href="mailto:khushikathayat.official@gmail.com" aria-label="Email" className="transition-colors hover:text-gold">
+              <Mail className="h-5 w-5" />
+            </a>
+            <a
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-4 text-xs uppercase tracking-[0.3em] gold-underline"
+            >
+              @meethi_talks
+            </a>
           </div>
         </div>
 
@@ -457,10 +490,10 @@ function Hero() {
           <div className="relative overflow-hidden rounded-[2rem] shadow-luxe">
             <img
               src={heroPortrait}
-              alt="Khushboo Singh portrait"
+              alt="Khushi — Meethi Talks portrait"
               width={1024}
               height={1408}
-              className="h-[560px] w-full object-cover lg:h-[680px]"
+              className="h-[560px] w-full object-cover transition-transform duration-[6s] hover:scale-105 lg:h-[680px]"
             />
           </div>
           <div className="absolute -bottom-6 -left-6 hidden rounded-2xl border border-border bg-background/90 px-5 py-4 shadow-soft backdrop-blur-md sm:block">

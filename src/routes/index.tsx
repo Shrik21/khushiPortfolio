@@ -158,13 +158,21 @@ const COLLABS = [
 
 const GALLERY = [
   { src: g1, cat: "Beauty", h: "tall" },
-  { src: g2, cat: "Fashion", h: "short" },
+  { src: g13, cat: "Beauty", h: "short" },
   { src: g3, cat: "Travel", h: "tall" },
   { src: g4, cat: "Lifestyle", h: "med" },
-  { src: g5, cat: "Travel", h: "med" },
+  { src: g14, cat: "Fashion", h: "tall" },
   { src: g6, cat: "Travel", h: "tall" },
   { src: g7, cat: "Fashion", h: "short" },
   { src: g8, cat: "Lifestyle", h: "med" },
+  { src: g9, cat: "Beauty", h: "med" },
+  { src: g10, cat: "Fashion", h: "tall" },
+  { src: g11, cat: "Beauty", h: "med" },
+  { src: g12, cat: "Beauty", h: "tall" },
+  { src: g5, cat: "Travel", h: "med" },
+  { src: g15, cat: "Lifestyle", h: "med" },
+  { src: g16, cat: "Lifestyle", h: "tall" },
+  { src: g2, cat: "Fashion", h: "short" },
   { src: heroPortrait, cat: "Beauty", h: "tall" },
 ];
 

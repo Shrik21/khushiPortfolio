@@ -35,9 +35,23 @@ import p900 from "@/assets/photos/1000093900.jpg.asset.json";
 import p901 from "@/assets/photos/1000093901.jpg.asset.json";
 import p904 from "@/assets/photos/1000093904.jpg.asset.json";
 import p907 from "@/assets/photos/1000093907.jpg.asset.json";
+import p892 from "@/assets/photos/1000093892.jpg.asset.json";
+import p893 from "@/assets/photos/1000093893.jpg.asset.json";
+import p902 from "@/assets/photos/1000093902.jpg.asset.json";
+import p903 from "@/assets/photos/1000093903.jpg.asset.json";
+import p905 from "@/assets/photos/1000093905.jpg.asset.json";
+import p906 from "@/assets/photos/1000093906.jpg.asset.json";
+import p908 from "@/assets/photos/1000093908.jpg.asset.json";
+import p909 from "@/assets/photos/1000093909.jpg.asset.json";
+import p910 from "@/assets/photos/1000093910.jpg.asset.json";
+
+const IG_URL = "https://instagram.com/meethi_talks";
+const PHONE = "7555149784";
 
 const heroPortrait = heroPortraitAsset.url;
 const aboutImage = aboutImageAsset.url;
+const bgLifestyle = p902.url;
+const bgContact = p894.url;
 const g1 = p896.url;
 const g2 = p907.url;
 const g3 = p899.url;
@@ -46,6 +60,14 @@ const g5 = p898.url;
 const g6 = p895.url;
 const g7 = p900.url;
 const g8 = p904.url;
+const g9 = p892.url;
+const g10 = p893.url;
+const g11 = p903.url;
+const g12 = p905.url;
+const g13 = p906.url;
+const g14 = p908.url;
+const g15 = p909.url;
+const g16 = p910.url;
 
 export const Route = createFileRoute("/")({
   head: () => ({

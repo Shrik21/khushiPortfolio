@@ -469,7 +469,13 @@ function Hero() {
             <a href="#" aria-label="Facebook" className="transition-colors hover:text-gold">
               <Facebook className="h-5 w-5" />
             </a>
-            <a href="mailto:khushikathayat.official@gmail.com" aria-label="Email" className="transition-colors hover:text-gold">
+            <a
+              href="https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=khushikathayat.official@gmail.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Email"
+              className="transition-colors hover:text-gold"
+            >
               <Mail className="h-5 w-5" />
             </a>
             <a
@@ -1037,7 +1043,13 @@ function Contact() {
     href?: string;
     external?: boolean;
   }> = [
-    { icon: Mail, label: "Email", val: "khushikathayat.official@gmail.com", href: "mailto:khushikathayat.official@gmail.com" },
+    {
+      icon: Mail,
+      label: "Email",
+      val: "khushikathayat.official@gmail.com",
+      href: "https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=khushikathayat.official@gmail.com",
+      external: true,
+    },
     { icon: Instagram, label: "Instagram", val: "@khushi_kathayat07", href: IG_URL, external: true },
     { icon: Phone, label: "Phone", val: PHONE, href: `tel:${PHONE}` },
     { icon: MapPin, label: "Based in", val: "Pithoragarh, Uttarakhand, India" },
@@ -1132,7 +1144,12 @@ function Contact() {
             {sent && (
               <p className="text-sm text-white/70 sm:col-span-2">
                 Opening your email app… If nothing happens, write to{" "}
-                <a href={`mailto:${EMAIL}`} className="text-gold underline">
+                <a
+                  href="https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=khushikathayat.official@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gold underline"
+                >
                   {EMAIL}
                 </a>
                 .

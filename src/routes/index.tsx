@@ -25,49 +25,47 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-import heroPortraitAsset from "@/assets/photos/1000093897.jpg.asset.json";
-import aboutImageAsset from "@/assets/photos/1000093894.jpg.asset.json";
-import p895 from "@/assets/photos/1000093895.jpg.asset.json";
-import p896 from "@/assets/photos/1000093896.jpg.asset.json";
-import p898 from "@/assets/photos/1000093898.jpg.asset.json";
-import p899 from "@/assets/photos/1000093899.jpg.asset.json";
-import p900 from "@/assets/photos/1000093900.jpg.asset.json";
-import p901 from "@/assets/photos/1000093901.jpg.asset.json";
-import p904 from "@/assets/photos/1000093904.jpg.asset.json";
-import p907 from "@/assets/photos/1000093907.jpg.asset.json";
-import p892 from "@/assets/photos/1000093892.jpg.asset.json";
-import p893 from "@/assets/photos/1000093893.jpg.asset.json";
-import p902 from "@/assets/photos/1000093902.jpg.asset.json";
-import p903 from "@/assets/photos/1000093903.jpg.asset.json";
-import p905 from "@/assets/photos/1000093905.jpg.asset.json";
-import p906 from "@/assets/photos/1000093906.jpg.asset.json";
-import p908 from "@/assets/photos/1000093908.jpg.asset.json";
-import p909 from "@/assets/photos/1000093909.jpg.asset.json";
-import p910 from "@/assets/photos/1000093910.jpg.asset.json";
+import heroPortrait from "@/assets/photos/1000093897.jpg";
+import aboutImage from "@/assets/photos/1000093894.jpg";
+import p895 from "@/assets/photos/1000093895.jpg";
+import p896 from "@/assets/photos/1000093896.jpg";
+import p898 from "@/assets/photos/1000093898.jpg";
+import p899 from "@/assets/photos/1000093899.jpg";
+import p900 from "@/assets/photos/1000093900.jpg";
+import p901 from "@/assets/photos/1000093901.jpg";
+import p904 from "@/assets/photos/1000093904.jpg";
+import p907 from "@/assets/photos/1000093907.jpg";
+import p892 from "@/assets/photos/1000093892.jpg";
+import p893 from "@/assets/photos/1000093893.jpg";
+import p902 from "@/assets/photos/1000093902.jpg";
+import p903 from "@/assets/photos/1000093903.jpg";
+import p905 from "@/assets/photos/1000093905.jpg";
+import p906 from "@/assets/photos/1000093906.jpg";
+import p908 from "@/assets/photos/1000093908.jpg";
+import p909 from "@/assets/photos/1000093909.jpg";
+import p910 from "@/assets/photos/1000093910.jpg";
 
-const IG_URL = "https://instagram.com/meethi_talks";
+const IG_URL = "https://www.instagram.com/khushi_kathayat07?igsh=dzdpaTVzZmt2dnJ5";
 const PHONE = "7555149784";
 
-const heroPortrait = heroPortraitAsset.url;
-const aboutImage = aboutImageAsset.url;
-const bgLifestyle = p902.url;
-const bgContact = aboutImageAsset.url;
-const g1 = p896.url;
-const g2 = p907.url;
-const g3 = p899.url;
-const g4 = p901.url;
-const g5 = p898.url;
-const g6 = p895.url;
-const g7 = p900.url;
-const g8 = p904.url;
-const g9 = p892.url;
-const g10 = p893.url;
-const g11 = p903.url;
-const g12 = p905.url;
-const g13 = p906.url;
-const g14 = p908.url;
-const g15 = p909.url;
-const g16 = p910.url;
+const bgLifestyle = p902;
+const bgContact = aboutImage;
+const g1 = p896;
+const g2 = p907;
+const g3 = p899;
+const g4 = p901;
+const g5 = p898;
+const g6 = p895;
+const g7 = p900;
+const g8 = p904;
+const g9 = p892;
+const g10 = p893;
+const g11 = p903;
+const g12 = p905;
+const g13 = p906;
+const g14 = p908;
+const g15 = p909;
+const g16 = p910;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -480,7 +478,7 @@ function Hero() {
               rel="noopener noreferrer"
               className="ml-4 text-xs uppercase tracking-[0.3em] gold-underline"
             >
-              @meethi_talks
+              @khushi_kathayat07
             </a>
           </div>
         </div>
@@ -1040,7 +1038,7 @@ function Contact() {
     external?: boolean;
   }> = [
     { icon: Mail, label: "Email", val: "khushikathayat.official@gmail.com", href: "mailto:khushikathayat.official@gmail.com" },
-    { icon: Instagram, label: "Instagram", val: "@meethi_talks", href: IG_URL, external: true },
+    { icon: Instagram, label: "Instagram", val: "@khushi_kathayat07", href: IG_URL, external: true },
     { icon: Phone, label: "Phone", val: PHONE, href: `tel:${PHONE}` },
     { icon: MapPin, label: "Based in", val: "Pithoragarh, Uttarakhand, India" },
   ];
@@ -1179,7 +1177,7 @@ function Contact() {
                   rel="noopener noreferrer"
                   className="text-white gold-underline"
                 >
-                  @meethi_talks
+                  @khushi_kathayat07
                 </a>{" "}
                 — DMs open for collaborations and press.
               </p>

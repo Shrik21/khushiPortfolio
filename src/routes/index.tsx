@@ -1061,7 +1061,19 @@ function Contact() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              window.location.href = `mailto:khushikathayat.official@gmail.com`;
+              const subject = `Collaboration Enquiry — ${form.Name || "New enquiry"}`;
+              const body = [
+                `Name: ${form.Name}`,
+                `Email: ${form.Email}`,
+                `Company: ${form.Company}`,
+                `Budget: ${form.Budget}`,
+                `Project Type: ${form.Project}`,
+                "",
+                form.Message,
+              ].join("\n");
+              const href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+              setSent(true);
+              window.location.href = href;
             }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2"
           >
@@ -1076,6 +1088,8 @@ function Contact() {
                 <input
                   required
                   type={f.type}
+                  value={form[f.name as keyof typeof form]}
+                  onChange={(e) => setForm((s) => ({ ...s, [f.name]: e.target.value }))}
                   className="mt-2 w-full border-b border-white/25 bg-transparent py-3 text-primary-foreground outline-none placeholder:text-white/40 focus:border-gold"
                 />
               </label>
@@ -1084,6 +1098,8 @@ function Contact() {
               <span className="text-xs uppercase tracking-[0.25em] text-white/60">Project Type</span>
               <input
                 type="text"
+                value={form.Project}
+                onChange={(e) => setForm((s) => ({ ...s, Project: e.target.value }))}
                 placeholder="Reels · Campaign · UGC · Event…"
                 className="mt-2 w-full border-b border-white/25 bg-transparent py-3 outline-none placeholder:text-white/40 focus:border-gold"
               />
@@ -1093,6 +1109,8 @@ function Contact() {
               <textarea
                 rows={4}
                 required
+                value={form.Message}
+                onChange={(e) => setForm((s) => ({ ...s, Message: e.target.value }))}
                 className="mt-2 w-full resize-none border-b border-white/25 bg-transparent py-3 outline-none placeholder:text-white/40 focus:border-gold"
               />
             </label>
@@ -1102,7 +1120,17 @@ function Contact() {
             >
               Send Enquiry <ArrowUpRight className="h-4 w-4" />
             </button>
+            {sent && (
+              <p className="text-sm text-white/70 sm:col-span-2">
+                Opening your email app… If nothing happens, write to{" "}
+                <a href={`mailto:${EMAIL}`} className="text-gold underline">
+                  {EMAIL}
+                </a>
+                .
+              </p>
+            )}
           </form>
+
 
           <div className="space-y-5 lg:pl-8">
             {items.map((c) => {

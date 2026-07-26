@@ -1019,7 +1019,18 @@ function FAQ() {
   );
 }
 
+const EMAIL = "khushikathayat.official@gmail.com";
+
 function Contact() {
+  const [form, setForm] = useState({
+    Name: "",
+    Email: "",
+    Company: "",
+    Budget: "",
+    Project: "",
+    Message: "",
+  });
+  const [sent, setSent] = useState(false);
   const ref = useReveal<HTMLElement>();
   const items: Array<{
     icon: typeof Mail;

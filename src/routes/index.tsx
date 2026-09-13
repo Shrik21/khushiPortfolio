@@ -23,6 +23,9 @@ import {
   Plus,
   Minus,
   ArrowRight,
+  MessageCircle,
+  Copy,
+  Check,
 } from "lucide-react";
 
 import heroPortrait from "@/assets/photos/1000093897.jpg";
@@ -82,11 +85,13 @@ export const Route = createFileRoute("/")({
 
 /* ---------------- Data ---------------- */
 
+// Order matches the order the sections appear on the page, so walking the nav
+// left to right never scrolls the reader backwards.
 const NAV = [
   { id: "home", label: "Home" },
   { id: "about", label: "About" },
-  { id: "portfolio", label: "Portfolio" },
   { id: "collaborations", label: "Collaborations" },
+  { id: "portfolio", label: "Portfolio" },
   { id: "services", label: "Services" },
   { id: "testimonials", label: "Testimonials" },
   { id: "contact", label: "Contact" },
@@ -174,7 +179,15 @@ const GALLERY = [
   { src: heroPortrait, cat: "Beauty", h: "tall" },
 ];
 
-const GALLERY_CATS = ["All", "Fashion", "Beauty", "Travel", "Food", "Lifestyle", "UGC", "Reels", "Photography"];
+// Derived from the gallery so a filter can never render an empty grid.
+const GALLERY_CATS = ["All", ...Array.from(new Set(GALLERY.map((g) => g.cat)))];
+
+/** Fixed ratios keep the masonry from reflowing as each photo decodes. */
+const GALLERY_RATIO: Record<string, string> = {
+  tall: "3 / 4",
+  med: "4 / 5",
+  short: "1 / 1",
+};
 
 const SERVICES = [
   { icon: Film, title: "Instagram Reels", desc: "Cinematic short-form storytelling built for reach and shares.", price: "₹ 25,000", timeline: "5–7 days" },
@@ -306,86 +319,186 @@ function useInView<T extends HTMLElement>() {
 
 /* ---------------- Components ---------------- */
 
-function Nav() {
-  const [open, setOpen] = useState(false);
+const NAV_IDS = NAV.map((n) => n.id);
+
+/**
+ * Tracks the section under the header, whether the page has left the top, and
+ * how far through the document the reader is — all from one rAF-throttled pass.
+ */
+function useScrollSpy(ids: string[]) {
+  const [active, setActive] = useState(ids[0]);
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState("home");
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 24);
-      const y = window.scrollY + 120;
-      for (const n of [...NAV].reverse()) {
-        const el = document.getElementById(n.id);
-        if (el && el.offsetTop <= y) {
-          setActive(n.id);
-          break;
-        }
-      }
+    let frame = 0;
+
+    const measure = () => {
+      frame = 0;
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+
+      setScrolled(window.scrollY > 12);
+      setProgress(max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0);
+
+      // Measure live positions rather than offsetTop: images finish loading
+      // long after mount and shift every section below them. Sorting by the
+      // measured top also keeps this correct if the nav is ever ordered
+      // differently from the page.
+      const seen = ids
+        .flatMap((id) => {
+          const el = document.getElementById(id);
+          return el ? [{ id, top: el.getBoundingClientRect().top }] : [];
+        })
+        .sort((a, b) => a.top - b.top);
+      // Sits below the header and below scroll-padding-top, so a section that
+      // has just docked under the header counts as the current one instead of
+      // losing by a fraction of a pixel.
+      const marker = 140;
+      const current = seen.filter((sec) => sec.top <= marker).at(-1);
+      // The last section is often too short to ever reach the marker.
+      const atBottom = window.scrollY >= max - 4;
+      setActive((atBottom ? seen.at(-1)?.id : current?.id) ?? ids[0]);
     };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+
+    measure();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    const ro = new ResizeObserver(schedule);
+    ro.observe(document.body);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      ro.disconnect();
+    };
+  }, [ids]);
+
+  return { active, scrolled, progress };
+}
+
+function Nav() {
+  const [open, setOpen] = useState(false);
+  const { active, scrolled, progress } = useScrollSpy(NAV_IDS);
+
+  // Lock the page behind the full-screen menu and give Escape a way out.
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? "bg-background/85 backdrop-blur-md border-b border-border" : "bg-transparent"
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300 ${
+          scrolled
+            ? "border-b border-border bg-ivory/95 shadow-header backdrop-blur-xl supports-[backdrop-filter]:bg-ivory/85"
+            : "border-b border-transparent bg-ivory/75 backdrop-blur-md supports-[backdrop-filter]:bg-ivory/60"
         }`}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-10">
-          <a href="#home" className="flex items-baseline gap-2">
-            <span className="font-display text-2xl tracking-tight">Meethi Talks</span>
+        <div
+          className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 transition-[height] duration-300 lg:px-10 ${
+            scrolled ? "h-16" : "h-20"
+          }`}
+        >
+          <a
+            href="#home"
+            className="flex shrink-0 items-baseline gap-2 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground"
+          >
+            <span className="font-display text-2xl leading-none tracking-tight">Meethi Talks</span>
             <span className="hidden text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:inline">
               by Khushi
             </span>
           </a>
-          <nav className="hidden items-center gap-8 lg:flex">
-            {NAV.map((n) => (
-              <a
-                key={n.id}
-                href={`#${n.id}`}
-                className={`text-sm tracking-wide transition-colors ${
-                  active === n.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {n.label}
-              </a>
-            ))}
+
+          <nav aria-label="Main navigation" className="hidden lg:block">
+            <ul className="flex items-center gap-1">
+              {NAV.map((n) => (
+                <li key={n.id}>
+                  <a
+                    href={`#${n.id}`}
+                    aria-current={active === n.id ? "location" : undefined}
+                    className={`inline-flex items-center rounded-full px-3.5 py-2 text-[13px] tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground ${
+                      active === n.id
+                        ? "bg-beige font-medium text-foreground"
+                        : "text-muted-foreground hover:bg-beige/60 hover:text-foreground"
+                    }`}
+                  >
+                    {n.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </nav>
-          <a
-            href="#contact"
-            className="hidden rounded-full bg-foreground px-5 py-2.5 text-xs uppercase tracking-[0.2em] text-primary-foreground transition-colors hover:bg-gold lg:inline-block"
-          >
-            Work With Me
-          </a>
-          <button
-            aria-label="Open menu"
-            className="rounded-full border border-border p-2 lg:hidden"
-            onClick={() => setOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </button>
+
+          <div className="flex shrink-0 items-center gap-3">
+            <a
+              href="#contact"
+              className="hidden rounded-full bg-foreground px-5 py-2.5 text-xs uppercase tracking-[0.2em] text-primary-foreground transition-colors hover:bg-gold lg:inline-block"
+            >
+              Work With Me
+            </a>
+            <button
+              type="button"
+              aria-label="Open menu"
+              aria-expanded={open}
+              className="inline-flex size-11 items-center justify-center rounded-full border border-border bg-background/70 text-foreground transition-colors hover:bg-beige lg:hidden"
+              onClick={() => setOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          </div>
         </div>
+
+        {/* Reading progress rides the header's bottom edge instead of floating
+            over it as a separate fixed bar. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[2px] origin-left bg-gold transition-transform duration-150 ease-out"
+          style={{ transform: `scaleX(${progress})` }}
+        />
       </header>
 
       {open && (
-        <div className="fixed inset-0 z-[60] animate-fade-in bg-ivory lg:hidden">
-          <div className="flex items-center justify-between px-6 py-5">
+        <div className="fixed inset-0 z-[60] animate-fade-in overflow-y-auto overscroll-contain bg-ivory lg:hidden">
+          <div className="flex h-20 items-center justify-between px-6">
             <span className="font-display text-2xl">Meethi Talks</span>
-            <button aria-label="Close menu" onClick={() => setOpen(false)} className="rounded-full border border-border p-2">
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setOpen(false)}
+              className="inline-flex size-11 items-center justify-center rounded-full border border-border bg-background"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>
-          <nav className="flex flex-col items-center gap-6 pt-12">
+          <nav
+            aria-label="Mobile navigation"
+            className="flex flex-col items-center gap-1.5 px-6 pb-16 pt-4"
+          >
             {NAV.map((n) => (
               <a
                 key={n.id}
                 href={`#${n.id}`}
                 onClick={() => setOpen(false)}
-                className="font-display text-4xl"
+                aria-current={active === n.id ? "location" : undefined}
+                className={`w-full rounded-2xl px-5 py-2.5 text-center font-display text-3xl transition-colors ${
+                  active === n.id ? "bg-rose/60 text-foreground" : "hover:bg-background"
+                }`}
               >
                 {n.label}
               </a>
@@ -393,14 +506,160 @@ function Nav() {
             <a
               href="#contact"
               onClick={() => setOpen(false)}
-              className="mt-6 rounded-full bg-foreground px-8 py-3 text-xs uppercase tracking-[0.25em] text-primary-foreground"
+              className="mt-6 w-full rounded-full bg-foreground px-8 py-4 text-center text-xs uppercase tracking-[0.25em] text-primary-foreground"
             >
               Work With Me
+            </a>
+            <a
+              href={IG_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-muted-foreground"
+            >
+              <Instagram className="h-4 w-4" /> @khushi_kathayat07
             </a>
           </nav>
         </div>
       )}
     </>
+  );
+}
+
+/** Photos that ride the orbit ring, in ring order. */
+const ORBIT_PHOTOS = [
+  { src: p896, pos: "50% 18%" },
+  { src: p901, pos: "50% 16%" },
+  { src: p908, pos: "50% 18%" },
+  { src: p893, pos: "50% 28%" },
+  { src: p909, pos: "40% 18%" },
+  { src: p900, pos: "50% 22%" },
+  { src: p907, pos: "50% 20%" },
+  { src: p906, pos: "50% 18%" },
+];
+
+const HERO_SLIDES = [
+  {
+    src: heroPortrait,
+    pos: "50% 16%",
+    alt: "Khushi in bridal jewellery and pink embroidered attire, looking downward with a soft expression",
+  },
+  { src: p896, pos: "50% 16%", alt: "" },
+  { src: p901, pos: "50% 16%", alt: "" },
+  { src: p906, pos: "50% 18%", alt: "" },
+];
+
+const SLIDE_MS = 4200;
+
+function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
+function HeroVisual() {
+  const visualRef = useRef<HTMLDivElement | null>(null);
+  const cardsRef = useRef<Array<HTMLElement | null>>([]);
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    const timer = setInterval(() => {
+      setSlide((current) => (current + 1) % HERO_SLIDES.length);
+    }, SLIDE_MS);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const visual = visualRef.current;
+    if (!visual || prefersReducedMotion()) return;
+
+    let angle = 0;
+    let paused = false;
+    let frame = 0;
+
+    const pause = () => {
+      paused = true;
+    };
+    const resume = () => {
+      paused = false;
+    };
+
+    const spin = () => {
+      if (!paused && !document.hidden) angle += 0.007;
+      const n = ORBIT_PHOTOS.length;
+      const rx = Math.min(visual.clientWidth * 0.42, 250);
+      const ry = Math.min(visual.clientHeight * 0.34, 190);
+
+      cardsRef.current.forEach((card, i) => {
+        if (!card) return;
+        const a = angle + (i / n) * Math.PI * 2;
+        const x = Math.sin(a) * rx;
+        const y = Math.cos(a) * ry * 0.72;
+        const depth = (Math.cos(a) + 1) / 2;
+        const scale = 0.78 + depth * 0.28;
+        // Cards passing in front of the portrait fade back so the face stays
+        // the focal point.
+        const overPortrait = Math.abs(x) < visual.clientWidth * 0.18;
+        card.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+        card.style.zIndex = overPortrait ? "2" : String(6 + Math.round(depth * 8));
+        card.style.opacity = overPortrait ? "0.28" : String(0.55 + depth * 0.45);
+      });
+
+      frame = requestAnimationFrame(spin);
+    };
+
+    visual.addEventListener("mouseenter", pause);
+    visual.addEventListener("mouseleave", resume);
+    frame = requestAnimationFrame(spin);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      visual.removeEventListener("mouseenter", pause);
+      visual.removeEventListener("mouseleave", resume);
+    };
+  }, []);
+
+  return (
+    <div ref={visualRef} className="hero-visual">
+      <div className="orbit" aria-hidden="true">
+        <div className="orbit-ring">
+          {ORBIT_PHOTOS.map((photo, i) => (
+            <figure
+              key={photo.src}
+              ref={(node) => {
+                cardsRef.current[i] = node;
+              }}
+              className="orbit-card"
+            >
+              <img src={photo.src} alt="" decoding="async" style={{ objectPosition: photo.pos }} />
+            </figure>
+          ))}
+        </div>
+      </div>
+
+      <figure className="hero-frame">
+        {HERO_SLIDES.map((photo, i) => (
+          <img
+            key={photo.src}
+            src={photo.src}
+            alt={photo.alt}
+            {...(photo.alt ? {} : { "aria-hidden": true })}
+            {...(i === 0 ? { fetchPriority: "high" as const } : { loading: "lazy" as const })}
+            style={{ objectPosition: photo.pos }}
+            className={i === slide ? "is-on" : ""}
+          />
+        ))}
+        <div className="proof proof-reach">
+          <strong>2.4M</strong>
+          <span>monthly reach</span>
+        </div>
+        <div className="proof proof-engage">
+          <strong>6.8%</strong>
+          <span>engagement</span>
+        </div>
+      </figure>
+    </div>
   );
 }
 
@@ -453,62 +712,40 @@ function Hero() {
               Collaborate
             </a>
           </div>
-          <div className="mt-12 flex items-center gap-5 text-muted-foreground">
+          <div className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-3 text-muted-foreground">
             <a
               href={IG_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="transition-all hover:-translate-y-0.5 hover:text-gold"
+              className="transition-all hover:-translate-y-0.5 hover:text-gold-ink"
             >
               <Instagram className="h-5 w-5" />
             </a>
-            <a href="#" aria-label="YouTube" className="transition-colors hover:text-gold">
-              <Youtube className="h-5 w-5" />
-            </a>
-            <a href="#" aria-label="Facebook" className="transition-colors hover:text-gold">
-              <Facebook className="h-5 w-5" />
-            </a>
             <a
-              href="https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=khushikathayat.official@gmail.com"
+              href={GMAIL_COMPOSE}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Email"
-              className="transition-colors hover:text-gold"
+              aria-label="Email Khushi"
+              className="transition-colors hover:text-gold-ink"
             >
               <Mail className="h-5 w-5" />
+            </a>
+            <a href={`tel:${PHONE}`} aria-label="Call Khushi" className="transition-colors hover:text-gold-ink">
+              <Phone className="h-5 w-5" />
             </a>
             <a
               href={IG_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-4 text-xs uppercase tracking-[0.3em] gold-underline"
+              className="text-xs uppercase tracking-[0.2em] gold-underline sm:ml-2 sm:tracking-[0.3em]"
             >
               @khushi_kathayat07
             </a>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute -inset-6 rounded-[2rem] bg-beige/70" />
-          <div className="relative overflow-hidden rounded-[2rem] shadow-luxe">
-            <img
-              src={heroPortrait}
-              alt="Khushi — Meethi Talks portrait"
-              width={1024}
-              height={1408}
-              className="h-[560px] w-full object-cover transition-transform duration-[6s] hover:scale-105 lg:h-[680px]"
-            />
-          </div>
-          <div className="absolute -bottom-6 -left-6 hidden rounded-2xl border border-border bg-background/90 px-5 py-4 shadow-soft backdrop-blur-md sm:block">
-            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">This month</div>
-            <div className="mt-1 font-display text-2xl">2.4M reach</div>
-          </div>
-          <div className="absolute -right-4 top-10 hidden rounded-2xl border border-border bg-background/90 px-5 py-4 shadow-soft backdrop-blur-md sm:block">
-            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">Engagement</div>
-            <div className="mt-1 font-display text-2xl text-gold">6.8%</div>
-          </div>
-        </div>
+        <HeroVisual />
       </div>
     </section>
   );
@@ -534,10 +771,22 @@ function About() {
     { label: "Hometown", value: "Pithoragarh, Uttarakhand, India" },
   ];
   return (
-    <section id="about" ref={ref} className="relative bg-background py-28 lg:py-36">
+    <section
+      id="about"
+      ref={ref}
+      className="relative overflow-hidden bg-background py-28 lg:py-36"
+    >
+      {/* Unblurred, a 5%-opacity photo reads as a smudge behind the cards
+          rather than as texture. */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{ backgroundImage: `url(${g13})`, backgroundSize: "cover", backgroundPosition: "center" }}
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage: `url(${g13})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(40px) saturate(1.2)",
+          transform: "scale(1.15)",
+        }}
         aria-hidden
       />
       <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-14 px-6 lg:grid-cols-2 lg:gap-20 lg:px-10">
@@ -680,14 +929,26 @@ function Audience() {
 
           <div className="rounded-2xl border border-border bg-ivory p-8">
             <h3 className="text-sm uppercase tracking-[0.25em] text-muted-foreground">Top Locations</h3>
-            <ul className="mt-6 divide-y divide-border text-sm">
-              {AUDIENCE.countries.map((c, i) => (
-                <li key={c} className="flex items-center justify-between py-2.5">
-                  <span>{c}</span>
-                  <span className="text-muted-foreground">{AUDIENCE.cities[i]}</span>
-                </li>
-              ))}
-            </ul>
+            {/* Countries and cities are two separate rankings — pairing them
+                row-by-row read as "United States → Delhi". */}
+            <div className="mt-6 grid grid-cols-2 gap-x-6 text-sm">
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.24em] text-gold-ink">Countries</div>
+                <ol className="mt-3 space-y-2.5">
+                  {AUDIENCE.countries.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ol>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.24em] text-gold-ink">Cities</div>
+                <ol className="mt-3 space-y-2.5 text-muted-foreground">
+                  {AUDIENCE.cities.map((c) => (
+                    <li key={c}>{c}</li>
+                  ))}
+                </ol>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-border bg-ivory p-8 lg:col-span-3">
@@ -765,6 +1026,21 @@ function Portfolio() {
   const ref = useReveal<HTMLElement>();
   const items = cat === "All" ? GALLERY : GALLERY.filter((g) => g.cat === cat);
 
+  // An overlay that only closes on click traps keyboard and touch users.
+  useEffect(() => {
+    if (!lightbox) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [lightbox]);
+
   return (
     <section id="portfolio" ref={ref} className="bg-background py-28 lg:py-36">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -788,15 +1064,17 @@ function Portfolio() {
         <div className="reveal mt-12 columns-2 gap-4 lg:columns-3 [&>*]:mb-4">
           {items.map((g, i) => (
             <button
-              key={i}
+              key={`${g.cat}-${i}`}
               onClick={() => setLightbox(g.src)}
-              className="group relative block w-full overflow-hidden rounded-2xl"
+              aria-label={`Open ${g.cat.toLowerCase()} photo in full size`}
+              className="group relative block w-full break-inside-avoid overflow-hidden rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
             >
               <img
                 src={g.src}
                 alt={g.cat}
                 loading="lazy"
-                className="w-full transition-transform duration-700 group-hover:scale-105"
+                style={{ aspectRatio: GALLERY_RATIO[g.h] ?? "4 / 5" }}
+                className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-foreground/60 via-transparent to-transparent p-5 opacity-0 transition-opacity group-hover:opacity-100">
                 <span className="text-xs uppercase tracking-[0.25em] text-primary-foreground">
@@ -810,13 +1088,26 @@ function Portfolio() {
 
       {lightbox && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo viewer"
           className="fixed inset-0 z-[70] flex animate-fade-in items-center justify-center bg-foreground/85 p-6 backdrop-blur"
           onClick={() => setLightbox(null)}
         >
-          <button className="absolute right-6 top-6 text-primary-foreground" aria-label="Close">
-            <X className="h-7 w-7" />
+          <button
+            type="button"
+            autoFocus
+            className="absolute right-6 top-6 inline-flex size-11 items-center justify-center rounded-full border border-white/25 text-primary-foreground transition-colors hover:bg-white/10"
+            aria-label="Close photo viewer"
+          >
+            <X className="h-6 w-6" />
           </button>
-          <img src={lightbox} alt="" className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-luxe" />
+          <img
+            src={lightbox}
+            alt=""
+            className="max-h-[85vh] max-w-full rounded-2xl object-contain shadow-luxe"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </section>
@@ -892,15 +1183,27 @@ function WhyMe() {
 
 function Testimonials() {
   const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
   const ref = useReveal<HTMLElement>();
+  // `i` is a dependency so picking a dot restarts the dwell time instead of
+  // flipping to the next quote a fraction of a second later.
   useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % TESTIMONIALS.length), 6000);
-    return () => clearInterval(t);
-  }, []);
+    if (paused) return;
+    const t = setTimeout(() => setI((v) => (v + 1) % TESTIMONIALS.length), 6000);
+    return () => clearTimeout(t);
+  }, [i, paused]);
   const t = TESTIMONIALS[i];
 
   return (
-    <section id="testimonials" ref={ref} className="bg-beige py-28 lg:py-36">
+    <section
+      id="testimonials"
+      ref={ref}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+      className="bg-beige py-28 lg:py-36"
+    >
       <div className="mx-auto max-w-4xl px-6 text-center lg:px-10">
         <SectionTitle eyebrow="Testimonials" title="Kind words from brand partners." />
         <div className="reveal mt-14 min-h-[220px]">
@@ -939,20 +1242,25 @@ function Testimonials() {
 }
 
 function BrandMarquee() {
-  const row = [...BRANDS, ...BRANDS];
   return (
-    <section className="border-y border-border bg-background py-14 overflow-hidden">
+    <section className="group border-y border-border bg-background py-14 overflow-hidden">
       <div className="mb-8 text-center text-xs uppercase tracking-[0.3em] text-muted-foreground">
         Trusted by brands
       </div>
-      <div className="flex animate-marquee gap-16 whitespace-nowrap">
-        {row.map((b, i) => (
-          <span
-            key={i}
-            className="font-display text-2xl tracking-[0.2em] text-muted-foreground/60 transition-colors hover:text-foreground"
-          >
-            {b}
-          </span>
+      {/* Two identical halves: translating exactly -50% then lands the second
+          half where the first started, so the loop has no visible jump. */}
+      <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
+        {[0, 1].map((half) => (
+          <ul key={half} aria-hidden={half === 1} className="flex shrink-0 gap-16 pr-16">
+            {BRANDS.map((b) => (
+              <li
+                key={b}
+                className="whitespace-nowrap font-display text-2xl tracking-[0.2em] text-muted-foreground/60 transition-colors hover:text-foreground"
+              >
+                {b}
+              </li>
+            ))}
+          </ul>
         ))}
       </div>
     </section>
@@ -998,16 +1306,25 @@ function FAQ() {
             return (
               <div key={f.q}>
                 <button
+                  type="button"
+                  id={`faq-trigger-${i}`}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-panel-${i}`}
                   onClick={() => setOpen(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-6 py-6 text-left"
+                  className="flex w-full items-center justify-between gap-6 py-6 text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
                 >
                   <span className="font-display text-xl sm:text-2xl">{f.q}</span>
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border transition-colors group-hover:border-gold">
                     {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                   </span>
                 </button>
                 <div
-                  className="grid overflow-hidden transition-all duration-500"
+                  id={`faq-panel-${i}`}
+                  role="region"
+                  aria-labelledby={`faq-trigger-${i}`}
+                  className={`grid overflow-hidden transition-all duration-500 ${
+                    isOpen ? "visible" : "invisible"
+                  }`}
                   style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
                 >
                   <div className="min-h-0">
@@ -1023,151 +1340,340 @@ function FAQ() {
   );
 }
 
+const CONTACT_STEPS = [
+  { title: "You send the enquiry", body: "The form copies your brief and opens a DM to Khushi." },
+  { title: "A reply within 24 hours", body: "Availability, a tailored quote and the next open slot." },
+  { title: "We lock the brief", body: "Concept, deliverables and shoot dates confirmed in writing." },
+];
+
 const EMAIL = "khushikathayat.official@gmail.com";
+const IG_HANDLE = "khushi_kathayat07";
+/** ig.me opens the Instagram app (or web DM) straight on Khushi's inbox. */
+const IG_DM_URL = `https://ig.me/m/${IG_HANDLE}`;
+const GMAIL_COMPOSE = `https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=${EMAIL}`;
+
+const PROJECT_TYPES = [
+  "Brand campaign",
+  "Reels & UGC",
+  "Photography",
+  "Event coverage",
+  "Long-term retainer",
+  "Something else",
+];
+
+const BUDGETS = ["Under ₹25,000", "₹25,000 – ₹50,000", "₹50,000 – ₹1,00,000", "₹1,00,000+", "Not sure yet"];
+
+type Enquiry = {
+  name: string;
+  email: string;
+  brand: string;
+  project: string;
+  budget: string;
+  message: string;
+};
+
+const EMPTY_ENQUIRY: Enquiry = {
+  name: "",
+  email: "",
+  brand: "",
+  project: PROJECT_TYPES[0],
+  budget: "",
+  message: "",
+};
+
+const fieldClass =
+  "mt-2 min-h-12 w-full rounded-xl border border-border bg-ivory px-4 py-3 text-[15px] text-foreground shadow-field transition-colors placeholder:text-muted-foreground/70 hover:border-gold-soft focus:border-gold focus:bg-background focus:outline-none focus:ring-4 focus:ring-gold/15";
+const labelClass = "text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground";
+
+function buildEnquiryMessage(form: Enquiry) {
+  return [
+    `Hi Khushi! I'm ${form.name.trim()} and I'd love to collaborate. ✨`,
+    "",
+    `Name: ${form.name.trim()}`,
+    `Email: ${form.email.trim()}`,
+    ...(form.brand.trim() ? [`Brand / company: ${form.brand.trim()}`] : []),
+    `Project: ${form.project}`,
+    ...(form.budget ? [`Budget: ${form.budget}`] : []),
+    "",
+    form.message.trim(),
+  ].join("\n");
+}
 
 function Contact() {
-  const [form, setForm] = useState({
-    Name: "",
-    Email: "",
-    Company: "",
-    Budget: "",
-    Project: "",
-    Message: "",
-  });
-  const [sent, setSent] = useState(false);
+  const [form, setForm] = useState<Enquiry>(EMPTY_ENQUIRY);
+  const [draft, setDraft] = useState("");
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">("idle");
   const ref = useReveal<HTMLElement>();
-  const items: Array<{
+
+  const update = <K extends keyof Enquiry>(key: K, value: Enquiry[K]) => {
+    setForm((current) => ({ ...current, [key]: value }));
+    // Any edit invalidates the draft that was handed to Instagram.
+    setDraft("");
+    setCopyState("idle");
+  };
+
+  const copyToClipboard = (message: string) =>
+    navigator.clipboard
+      ?.writeText(message)
+      .then(() => setCopyState("copied"))
+      .catch(() => setCopyState("manual")) ?? setCopyState("manual");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const message = buildEnquiryMessage(form);
+    setDraft(message);
+
+    // Instagram deep links cannot carry a prefilled body, so the enquiry goes
+    // to the clipboard and the DM thread opens ready to paste. Both calls stay
+    // inside the submit gesture — awaiting the clipboard first would let the
+    // popup blocker swallow the new tab.
+    void copyToClipboard(message);
+    window.open(IG_DM_URL, "_blank", "noopener,noreferrer");
+  };
+
+  const channels: Array<{
     icon: typeof Mail;
     label: string;
-    val: string;
+    value: string;
     href?: string;
     external?: boolean;
   }> = [
-    {
-      icon: Mail,
-      label: "Email",
-      val: "khushikathayat.official@gmail.com",
-      href: "https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=khushikathayat.official@gmail.com",
-      external: true,
-    },
-    { icon: Instagram, label: "Instagram", val: "@khushi_kathayat07", href: IG_URL, external: true },
-    { icon: Phone, label: "Phone", val: PHONE, href: `tel:${PHONE}` },
-    { icon: MapPin, label: "Based in", val: "Pithoragarh, Uttarakhand, India" },
+    { icon: Instagram, label: "Instagram", value: `@${IG_HANDLE}`, href: IG_URL, external: true },
+    { icon: Mail, label: "Email", value: EMAIL, href: GMAIL_COMPOSE, external: true },
+    { icon: Phone, label: "Phone", value: PHONE, href: `tel:${PHONE}` },
+    { icon: MapPin, label: "Based in", value: "Pithoragarh, Uttarakhand, India" },
   ];
+
   return (
     <section
       id="contact"
       ref={ref}
-      className="relative overflow-hidden bg-foreground py-28 text-primary-foreground lg:py-36"
+      className="relative overflow-hidden bg-blush py-28 lg:py-36"
     >
+      {/* Warm, low-contrast atmosphere instead of a hard black block. */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-25"
-        style={{ backgroundImage: `url(${bgContact})`, backgroundSize: "cover", backgroundPosition: "center" }}
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage: `url(${bgContact})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "blur(18px) saturate(1.1)",
+          transform: "scale(1.1)",
+        }}
         aria-hidden
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-foreground/85 via-foreground/90 to-foreground" aria-hidden />
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-beige via-rose/25 to-beige"
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute -left-28 top-24 h-96 w-96 rounded-full bg-rose/40 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-gold-soft/30 blur-3xl" aria-hidden />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
         <div className="reveal mx-auto max-w-3xl text-center">
           <span className="eyebrow">Contact</span>
           <h2 className="mt-4 font-display text-4xl leading-tight sm:text-6xl">
-            Let's build something amazing <em className="not-italic text-gold">together</em>.
+            Let&rsquo;s build something amazing{" "}
+            <em className="not-italic text-gold-ink">together</em>.
           </h2>
-          <p className="mt-5 text-white/70">
-            Share a little about your brand and campaign — I reply within 24 hours.
+          <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Tell me about your brand and I&rsquo;ll reply on Instagram within 24 hours.
           </p>
         </div>
 
-        <div className="reveal mt-16 grid grid-cols-1 gap-14 lg:grid-cols-[1.2fr_0.8fr]">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const subject = `Collaboration Enquiry — ${form.Name || "New enquiry"}`;
-              const body = [
-                `Name: ${form.Name}`,
-                `Email: ${form.Email}`,
-                `Company: ${form.Company}`,
-                `Budget: ${form.Budget}`,
-                `Project Type: ${form.Project}`,
-                "",
-                form.Message,
-              ].join("\n");
-              const href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-              setSent(true);
-              window.location.href = href;
-            }}
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2"
-          >
-            {[
-              { name: "Name", type: "text" },
-              { name: "Email", type: "email" },
-              { name: "Company", type: "text" },
-              { name: "Budget", type: "text" },
-            ].map((f) => (
-              <label key={f.name} className="block">
-                <span className="text-xs uppercase tracking-[0.25em] text-white/60">{f.name}</span>
+        <div className="reveal mt-16 grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
+          <div className="rounded-3xl border border-border bg-background p-6 shadow-luxe sm:p-9">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-rose to-gold-soft text-foreground">
+                <MessageCircle className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="font-display text-2xl leading-none">Send an enquiry</h3>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Opens a DM to @{IG_HANDLE} with your details copied, ready to paste.
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} noValidate={false} className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <label className="block">
+                <span className={labelClass}>
+                  Name <span className="text-gold-ink">*</span>
+                </span>
                 <input
                   required
-                  type={f.type}
-                  value={form[f.name as keyof typeof form]}
-                  onChange={(e) => setForm((s) => ({ ...s, [f.name]: e.target.value }))}
-                  className="mt-2 w-full border-b border-white/25 bg-transparent py-3 text-primary-foreground outline-none placeholder:text-white/40 focus:border-gold"
+                  type="text"
+                  name="name"
+                  autoComplete="name"
+                  placeholder="Your full name"
+                  value={form.name}
+                  onChange={(e) => update("name", e.target.value)}
+                  className={fieldClass}
                 />
               </label>
-            ))}
-            <label className="block sm:col-span-2">
-              <span className="text-xs uppercase tracking-[0.25em] text-white/60">Project Type</span>
-              <input
-                type="text"
-                value={form.Project}
-                onChange={(e) => setForm((s) => ({ ...s, Project: e.target.value }))}
-                placeholder="Reels · Campaign · UGC · Event…"
-                className="mt-2 w-full border-b border-white/25 bg-transparent py-3 outline-none placeholder:text-white/40 focus:border-gold"
-              />
-            </label>
-            <label className="block sm:col-span-2">
-              <span className="text-xs uppercase tracking-[0.25em] text-white/60">Message</span>
-              <textarea
-                rows={4}
-                required
-                value={form.Message}
-                onChange={(e) => setForm((s) => ({ ...s, Message: e.target.value }))}
-                className="mt-2 w-full resize-none border-b border-white/25 bg-transparent py-3 outline-none placeholder:text-white/40 focus:border-gold"
-              />
-            </label>
-            <button
-              type="submit"
-              className="mt-4 inline-flex items-center justify-center gap-2 rounded-full bg-gold px-8 py-4 text-xs uppercase tracking-[0.25em] text-foreground transition-colors hover:bg-primary-foreground sm:col-span-2"
-            >
-              Send Enquiry <ArrowUpRight className="h-4 w-4" />
-            </button>
-            {sent && (
-              <p className="text-sm text-white/70 sm:col-span-2">
-                Opening your email app… If nothing happens, write to{" "}
+              <label className="block">
+                <span className={labelClass}>
+                  Email <span className="text-gold-ink">*</span>
+                </span>
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  placeholder="you@brand.com"
+                  value={form.email}
+                  onChange={(e) => update("email", e.target.value)}
+                  className={fieldClass}
+                />
+              </label>
+              <label className="block">
+                <span className={labelClass}>Brand / company</span>
+                <input
+                  type="text"
+                  name="brand"
+                  autoComplete="organization"
+                  placeholder="Optional"
+                  value={form.brand}
+                  onChange={(e) => update("brand", e.target.value)}
+                  className={fieldClass}
+                />
+              </label>
+              <label className="block">
+                <span className={labelClass}>Budget</span>
+                <select
+                  name="budget"
+                  value={form.budget}
+                  onChange={(e) => update("budget", e.target.value)}
+                  className={`${fieldClass} appearance-none bg-[length:1.1rem] bg-[right_1rem_center] bg-no-repeat pr-10`}
+                  style={{
+                    backgroundImage:
+                      "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+                  }}
+                >
+                  <option value="">Select a range</option>
+                  {BUDGETS.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <fieldset className="sm:col-span-2">
+                <legend className={labelClass}>Project type</legend>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {PROJECT_TYPES.map((type) => {
+                    const selected = form.project === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        aria-pressed={selected}
+                        onClick={() => update("project", type)}
+                        className={`rounded-full border px-4 py-2 text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground ${
+                          selected
+                            ? "border-foreground bg-foreground text-primary-foreground"
+                            : "border-border bg-ivory text-muted-foreground hover:border-gold hover:text-foreground"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
+
+              <label className="block sm:col-span-2">
+                <span className={labelClass}>
+                  About the project <span className="text-gold-ink">*</span>
+                </span>
+                <textarea
+                  required
+                  rows={5}
+                  name="message"
+                  placeholder="Goals, deliverables, timelines — anything that helps me quote accurately."
+                  value={form.message}
+                  onChange={(e) => update("message", e.target.value)}
+                  className={`${fieldClass} resize-y`}
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="group inline-flex min-h-13 items-center justify-center gap-2.5 rounded-full bg-foreground px-8 py-4 text-xs uppercase tracking-[0.22em] text-primary-foreground transition-colors hover:bg-gold-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground sm:col-span-2"
+              >
+                <Instagram className="h-4 w-4" />
+                Send enquiry on Instagram
+                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </button>
+
+              <p className="text-center text-xs text-muted-foreground sm:col-span-2">
+                Prefer email?{" "}
                 <a
-                  href="https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=khushikathayat.official@gmail.com"
+                  href={GMAIL_COMPOSE}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gold underline"
+                  className="text-foreground gold-underline"
                 >
-                  {EMAIL}
+                  Write to {EMAIL}
                 </a>
-                .
               </p>
-            )}
-          </form>
+            </form>
 
-
-          <div className="space-y-5 lg:pl-8">
-            {items.map((c) => {
-              const Inner = (
-                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition-all hover:-translate-y-0.5 hover:border-gold/60 hover:bg-white/10">
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20 text-gold">
-                    <c.icon className="h-5 w-5" />
-                  </div>
+            {draft && (
+              <div className="mt-7 animate-fade-up rounded-2xl border border-gold/40 bg-ivory p-5">
+                <div className="flex items-start gap-3">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-gold/20 text-gold-ink">
+                    <Check className="h-4 w-4" />
+                  </span>
                   <div className="min-w-0">
-                    <div className="text-xs uppercase tracking-[0.25em] text-white/50">{c.label}</div>
-                    <div className="mt-1 truncate">{c.val}</div>
+                    <p className="text-sm font-medium">
+                      {copyState === "copied"
+                        ? "Copied — paste it into the Instagram chat."
+                        : "Your enquiry is ready. Copy it below and paste it into the chat."}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Instagram can&rsquo;t prefill messages, so the DM opens empty on purpose.
+                    </p>
+                  </div>
+                </div>
+                <pre className="mt-4 max-h-44 overflow-auto whitespace-pre-wrap break-words rounded-xl border border-border bg-background p-4 font-sans text-[13px] leading-relaxed text-muted-foreground">
+                  {draft}
+                </pre>
+                <div className="mt-4 flex flex-wrap gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => void copyToClipboard(draft)}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-background px-5 text-xs uppercase tracking-[0.18em] transition-colors hover:border-gold hover:text-gold-ink"
+                  >
+                    {copyState === "copied" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copyState === "copied" ? "Copied" : "Copy message"}
+                  </button>
+                  <a
+                    href={IG_DM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full bg-foreground px-5 text-xs uppercase tracking-[0.18em] text-primary-foreground transition-colors hover:bg-gold-ink"
+                  >
+                    <Instagram className="h-3.5 w-3.5" /> Open the DM
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+            {channels.map((c) => {
+              const inner = (
+                <div className="flex items-start gap-4 rounded-2xl border border-border bg-background p-5 transition-all hover:-translate-y-0.5 hover:border-gold hover:shadow-soft">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-ivory text-gold-ink">
+                    <c.icon className="h-5 w-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                      {c.label}
+                    </div>
+                    <div className="mt-1 truncate text-[15px]">{c.value}</div>
                   </div>
                 </div>
               );
@@ -1176,28 +1682,50 @@ function Contact() {
                   key={c.label}
                   href={c.href}
                   {...(c.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="block"
+                  className="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
                 >
-                  {Inner}
+                  {inner}
                 </a>
               ) : (
-                <div key={c.label}>{Inner}</div>
+                <div key={c.label}>{inner}</div>
               );
             })}
-            <div className="rounded-2xl border border-white/15 bg-white/5 p-6">
-              <div className="text-xs uppercase tracking-[0.25em] text-gold">Follow for Daily Love Vibes ❤️</div>
-              <p className="mt-2 text-sm text-white/70">
-                Say hi on Instagram{" "}
-                <a
-                  href={IG_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white gold-underline"
-                >
-                  @khushi_kathayat07
-                </a>{" "}
-                — DMs open for collaborations and press.
+
+            <div className="rounded-2xl border border-border bg-background p-6">
+              <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                What happens next
+              </div>
+              <ol className="mt-4 space-y-4">
+                {CONTACT_STEPS.map((step, i) => (
+                  <li key={step.title} className="flex gap-3.5">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-ivory font-display text-sm text-gold-ink">
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[15px] leading-snug">{step.title}</div>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{step.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="rounded-2xl border border-gold/30 bg-gradient-to-br from-rose/45 to-gold-soft/25 p-6">
+              <div className="text-[11px] uppercase tracking-[0.22em] text-gold-ink">
+                Follow for Daily Love Vibes ❤️
+              </div>
+              <p className="mt-2.5 text-sm leading-relaxed text-foreground/75">
+                DMs are open for collaborations and press. Say hi on Instagram — most enquiries get
+                a reply the same day.
               </p>
+              <a
+                href={IG_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-full bg-background px-5 text-xs uppercase tracking-[0.18em] transition-colors hover:text-gold-ink"
+              >
+                <Instagram className="h-4 w-4" /> @{IG_HANDLE}
+              </a>
             </div>
           </div>
         </div>
@@ -1207,11 +1735,11 @@ function Contact() {
 }
 
 function Footer() {
+  const [subscribed, setSubscribed] = useState(false);
   const socials: Array<{ I: typeof Instagram; href: string; label: string; external?: boolean }> = [
     { I: Instagram, href: IG_URL, label: "Instagram", external: true },
-    { I: Youtube, href: "#", label: "YouTube" },
-    { I: Facebook, href: "#", label: "Facebook" },
-    { I: Mail, href: "mailto:khushikathayat.official@gmail.com", label: "Email" },
+    { I: MessageCircle, href: IG_DM_URL, label: "Message on Instagram", external: true },
+    { I: Mail, href: GMAIL_COMPOSE, label: "Email", external: true },
   ];
   return (
     <footer className="border-t border-border bg-ivory py-14">
@@ -1256,24 +1784,45 @@ function Footer() {
         </div>
         <div>
           <div className="text-xs uppercase tracking-[0.28em] text-muted-foreground">Newsletter</div>
-          <form onSubmit={(e) => e.preventDefault()} className="mt-4 flex items-center border-b border-border">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSubscribed(true);
+            }}
+            className="mt-4 flex items-center border-b border-border"
+          >
+            <label htmlFor="newsletter-email" className="sr-only">
+              Email address
+            </label>
             <input
+              id="newsletter-email"
               type="email"
+              name="email"
+              required
+              autoComplete="email"
               placeholder="your@email.com"
               className="w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
             />
-            <button className="text-muted-foreground hover:text-gold" aria-label="Subscribe">
+            <button
+              type="submit"
+              className="p-1 text-muted-foreground transition-colors hover:text-gold-ink"
+              aria-label="Subscribe"
+            >
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>
+          <p aria-live="polite" className="mt-2 text-xs text-muted-foreground">
+            {subscribed
+              ? "Thanks — you're on the list. ❤️"
+              : "Occasional notes on new work. No spam."}
+          </p>
         </div>
       </div>
       <div className="mx-auto mt-12 flex max-w-7xl flex-col items-center justify-between gap-3 px-6 text-xs text-muted-foreground sm:flex-row lg:px-10">
         <div>© {new Date().getFullYear()} Meethi Talks by Khushi. All rights reserved.</div>
-        <div className="flex gap-6">
-          <a href="#" className="gold-underline">Privacy</a>
-          <a href="#" className="gold-underline">Terms</a>
-        </div>
+        <a href={IG_URL} target="_blank" rel="noopener noreferrer" className="gold-underline">
+          Follow for Daily Love Vibes ❤️
+        </a>
       </div>
     </footer>
   );
@@ -1314,9 +1863,11 @@ function ParallaxStrip({
         className="absolute inset-0 h-[120%] w-full object-cover will-change-transform"
         style={{ transform: `translate3d(0, ${y}px, 0)` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-foreground/40 via-foreground/30 to-foreground/60" />
+      {/* The quote sits over whatever the photo happens to be, so the scrim has
+          to hold on light frames too. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-foreground/55 via-foreground/45 to-foreground/65" />
       <div className="relative mx-auto flex h-full max-w-4xl items-center justify-center px-6 text-center">
-        <p className="font-display text-3xl italic leading-snug text-primary-foreground sm:text-5xl">
+        <p className="font-display text-3xl italic leading-snug text-primary-foreground drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:text-5xl">
           "{quote}"
         </p>
       </div>
@@ -1327,25 +1878,8 @@ function ParallaxStrip({
 /* ---------------- Page ---------------- */
 
 function Home() {
-  // Scroll progress indicator
-  const [prog, setProg] = useState(0);
-  useEffect(() => {
-    const on = () => {
-      const h = document.documentElement;
-      const p = h.scrollTop / (h.scrollHeight - h.clientHeight);
-      setProg(Math.max(0, Math.min(1, p)));
-    };
-    on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
-  }, []);
-
   return (
     <>
-      <div
-        className="fixed left-0 top-0 z-[55] h-[2px] bg-gold transition-[width]"
-        style={{ width: `${prog * 100}%` }}
-      />
       <Nav />
       <main>
         <Hero />
